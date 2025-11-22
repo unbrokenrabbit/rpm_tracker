@@ -211,6 +211,59 @@ def get_all_components(nexus_url=None, repositories=None):
     return all_components
 
 
+def generate_packages_list(repositories, components, output_file="packages_list.json"):
+    """
+    Generate a JSON output file listing repository names and components.
+    
+    This function creates a JSON file containing the specified repositories and components
+    in a structured format. Each component in the output will only contain the fields:
+    repository, name, version, and assets.
+    
+    Args:
+        repositories (list): List of repository names to include in the output.
+        components (list): List of component dictionaries to include in the output.
+        output_file (str, optional): Path to the output JSON file. Defaults to "packages_list.json".
+    
+    Returns:
+        str: The path to the created output file.
+    
+    Raises:
+        IOError: If the file cannot be written.
+        TypeError: If the data cannot be serialized to JSON.
+    """
+    # Filter components to only include specified fields
+    filtered_components = []
+    for component in components:
+        filtered_component = {}
+        # Only include repository, name, version, and assets fields
+        if 'repository' in component:
+            filtered_component['repository'] = component['repository']
+        if 'name' in component:
+            filtered_component['name'] = component['name']
+        if 'version' in component:
+            filtered_component['version'] = component['version']
+        if 'assets' in component:
+            filtered_component['assets'] = component['assets']
+        filtered_components.append(filtered_component)
+    
+    # Structure the output data
+    output_data = {
+        "repositories": repositories,
+        "components": filtered_components
+    }
+    
+    try:
+        # Write JSON to file with pretty formatting
+        with open(output_file, 'w', encoding='utf-8') as f:
+            json.dump(output_data, f, indent=2, ensure_ascii=False)
+        
+        return output_file
+    except IOError as e:
+        raise IOError(f"Failed to write to output file {output_file}: {e}")
+    except TypeError as e:
+        raise TypeError(f"Failed to serialize data to JSON: {e}")
+
+
 def main():
     print("Hello, World!")
     print("Nexus Populator service is running!")
@@ -222,17 +275,20 @@ def main():
     for repository_name in repository_names:
         print( f"repository: {repository_name}" )
 
-    print( 'assets' )
-    print( '------------------------' )
-    assets = get_all_assets()
-    for asset in assets:
-        print( f"asset: {asset}" )
+    #print( 'assets' )
+    #print( '------------------------' )
+    #assets = get_all_assets()
+    #for asset in assets:
+    #    print( f"asset: {asset}" )
 
     print( 'components' )
     print( '------------------------' )
     components = get_all_components()
     for component in components:
         print( f"component: {component}" )
+
+    generate_packages_list( repository_names, components, '/app/data/packages.json' )
+
 
 if __name__ == "__main__":
     main()

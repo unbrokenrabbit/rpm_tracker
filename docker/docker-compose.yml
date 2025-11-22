@@ -9,14 +9,17 @@ services:
       - NEXUS_PORT
     #restart: unless-stopped
     # Add volume mounts here
-    # volumes:
-    #   - ./data:/app/data
+    volumes:
+      - rpm_tracker_data:/app/data
     # Add command to run
     # command: /bin/sh -c "echo 'Nexus Populator starting...'"
     # Add network configuration if needed
     # networks:
     #   - nexus-network
 
+volumes:
+  rpm_tracker_data:
+    name: rpm_tracker_data
 # Uncomment if you need custom networks
 # networks:
 #   nexus-network:
