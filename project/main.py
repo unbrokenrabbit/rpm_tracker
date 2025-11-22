@@ -217,7 +217,8 @@ def generate_packages_list(repositories, components, output_file="packages_list.
     
     This function creates a JSON file containing the specified repositories and components
     in a structured format. Each component in the output will only contain the fields:
-    repository, name, version, and assets.
+    repository, name, version, and assets. Each asset will only contain the fields:
+    downloadUrl and path.
     
     Args:
         repositories (list): List of repository names to include in the output.
@@ -243,7 +244,16 @@ def generate_packages_list(repositories, components, output_file="packages_list.
         if 'version' in component:
             filtered_component['version'] = component['version']
         if 'assets' in component:
-            filtered_component['assets'] = component['assets']
+            # Filter assets to only include downloadUrl and path fields
+            filtered_assets = []
+            for asset in component['assets']:
+                filtered_asset = {}
+                if 'downloadUrl' in asset:
+                    filtered_asset['downloadUrl'] = asset['downloadUrl']
+                if 'path' in asset:
+                    filtered_asset['path'] = asset['path']
+                filtered_assets.append(filtered_asset)
+            filtered_component['assets'] = filtered_assets
         filtered_components.append(filtered_component)
     
     # Structure the output data
