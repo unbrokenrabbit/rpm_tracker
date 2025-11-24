@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-echo "Starting Nexus Populator service..."
+echo "Starting RPM Tracker"
 
 # Execute the main Python script
 exec python3 main.py
