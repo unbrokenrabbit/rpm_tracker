@@ -2,6 +2,7 @@
 """
 Nexus Populator - Hello World
 """
+import csv
 import json
 import os
 import urllib.request
@@ -274,7 +275,74 @@ def generate_packages_list_json( repositories, components, output_file="packages
         raise TypeError( f"Failed to serialize data to JSON: {e}" )
 
 def generate_packages_list_csv( components, output_file="packages_list.csv" ):
-    print( 'TODO' )
+    """
+    Generate a CSV output file listing component fields.
+    
+    This function creates a CSV file containing component information.
+    The output excludes assets and includes all other component fields such as:
+    id, repository, format, group, name, version, etc.
+    
+    Args:
+        components (list): List of component dictionaries to include in the output.
+        output_file (str, optional): Path to the output CSV file. Defaults to "packages_list.csv".
+    
+    Returns:
+        str: The path to the created output file.
+    
+    Raises:
+        IOError: If the file cannot be written.
+    """
+    if not components:
+        # Create empty CSV with header if no components
+        try:
+            with open( output_file, 'w', newline='', encoding='utf-8' ) as f:
+                writer = csv.writer( f )
+                writer.writerow( ['id', 'repository', 'format', 'group', 'name', 'version'] )
+            return output_file
+        except IOError as e:
+            raise IOError( f"Failed to write to output file {output_file}: {e}" )
+    
+    # Collect all possible field names from components (excluding 'assets')
+    all_field_names = set( )
+    for component in components:
+        for key in component.keys( ):
+            if key != 'assets':
+                all_field_names.add( key )
+    
+    # Sort field names for consistent column order
+    # Put common fields first: repository, name, version
+    common_fields = ['repository', 'name', 'version']
+    field_names = []
+    for field in common_fields:
+        if field in all_field_names:
+            field_names.append( field )
+            all_field_names.remove( field )
+    
+    # Add remaining fields in sorted order
+    field_names.extend( sorted( all_field_names ) )
+    
+    try:
+        with open( output_file, 'w', newline='', encoding='utf-8' ) as f:
+            writer = csv.DictWriter( f, fieldnames=field_names, extrasaction='ignore' )
+            writer.writeheader( )
+            
+            for component in components:
+                # Create a copy of component without assets
+                row = {}
+                for k, v in component.items( ):
+                    if k != 'assets':
+                        # Convert complex types to strings for CSV
+                        if v is None:
+                            row[k] = ''
+                        elif isinstance( v, ( list, dict ) ):
+                            row[k] = json.dumps( v )
+                        else:
+                            row[k] = v
+                writer.writerow( row )
+        
+        return output_file
+    except IOError as e:
+        raise IOError( f"Failed to write to output file {output_file}: {e}" )
 
 
 def main():
