@@ -211,7 +211,7 @@ def get_all_components( nexus_url=None, repositories=None ):
     return all_components
 
 
-def generate_packages_list( repositories, components, output_file="packages_list.json" ):
+def generate_packages_list_json( repositories, components, output_file="packages_list.json" ):
     """
     Generate a JSON output file listing repository names and components.
     
@@ -273,6 +273,9 @@ def generate_packages_list( repositories, components, output_file="packages_list
     except TypeError as e:
         raise TypeError( f"Failed to serialize data to JSON: {e}" )
 
+def generate_packages_list_csv( components, output_file="packages_list.csv" ):
+    print( 'TODO' )
+
 
 def main():
     print( "Nexus Populator service is running!" )
@@ -296,7 +299,8 @@ def main():
     for component in components:
         print( f"component: {component}" )
 
-    generate_packages_list( repository_names, components, '/app/data/packages.json' )
+    generate_packages_list_json( repository_names, components, '/app/data/packages.json' )
+    generate_packages_list_csv( components, '/app/data/packages.csv' )
 
 
 if __name__ == "__main__":
