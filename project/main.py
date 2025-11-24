@@ -19,12 +19,12 @@ def get_nexus_url():
     Returns:
         str: The base URL of the Nexus instance (e.g., "http://localhost:48481")
     """
-    hostname = os.getenv("NEXUS_HOSTNAME", "localhost")
-    port = os.getenv("NEXUS_PORT", "48481")
+    hostname = os.getenv( "NEXUS_HOSTNAME", "localhost" )
+    port = os.getenv( "NEXUS_PORT", "48481" )
     return f"http://{hostname}:{port}"
 
 
-def get_repository_names(nexus_url=None):
+def get_repository_names( nexus_url=None ):
     """
     Retrieve a list of repository names from a Nexus instance.
     
@@ -46,20 +46,20 @@ def get_repository_names(nexus_url=None):
     api_endpoint = f"{nexus_url}/service/rest/v1/repositories"
     
     try:
-        with urllib.request.urlopen(api_endpoint) as response:
-            data = json.loads(response.read().decode('utf-8'))
+        with urllib.request.urlopen( api_endpoint ) as response:
+            data = json.loads( response.read( ).decode( 'utf-8' ) )
             
             # Extract repository names from the response
-            repository_names = [repo.get('name') for repo in data if 'name' in repo]
+            repository_names = [repo.get( 'name' ) for repo in data if 'name' in repo]
             
             return repository_names
     except urllib.error.URLError as e:
-        raise urllib.error.URLError(f"Failed to connect to Nexus API at {api_endpoint}: {e}")
+        raise urllib.error.URLError( f"Failed to connect to Nexus API at {api_endpoint}: {e}" )
     except json.JSONDecodeError as e:
-        raise ValueError(f"Failed to parse JSON response: {e}")
+        raise ValueError( f"Failed to parse JSON response: {e}" )
 
 
-def get_all_assets(nexus_url=None, repositories=None):
+def get_all_assets( nexus_url=None, repositories=None ):
     """
     Retrieve a list of all assets from specified repositories in a Nexus instance.
     
@@ -86,10 +86,10 @@ def get_all_assets(nexus_url=None, repositories=None):
         nexus_url = get_nexus_url()
     
     # Get all repository names
-    all_repository_names = get_repository_names(nexus_url)
+    all_repository_names = get_repository_names( nexus_url )
     
     # Filter repositories if specified
-    if repositories and len(repositories) > 0:
+    if repositories and len( repositories ) > 0:
         # Only use repositories that exist in the Nexus instance
         repository_names = [repo for repo in repositories if repo in all_repository_names]
     else:
@@ -111,31 +111,31 @@ def get_all_assets(nexus_url=None, repositories=None):
                 params["continuationToken"] = continuation_token
             
             # Build query string
-            query_string = "&".join([f"{k}={urllib.parse.quote(str(v))}" for k, v in params.items()])
+            query_string = "&".join( [f"{k}={urllib.parse.quote( str( v ) )}" for k, v in params.items( )] )
             full_url = f"{api_endpoint}?{query_string}"
             
             try:
-                with urllib.request.urlopen(full_url) as response:
-                    data = json.loads(response.read().decode('utf-8'))
+                with urllib.request.urlopen( full_url ) as response:
+                    data = json.loads( response.read( ).decode( 'utf-8' ) )
                     
                     # Extract assets from the response
                     if 'items' in data:
-                        all_assets.extend(data['items'])
+                        all_assets.extend( data['items'] )
                     
                     # Check if there's a continuation token for pagination
-                    continuation_token = data.get('continuationToken')
+                    continuation_token = data.get( 'continuationToken' )
                     if not continuation_token:
                         break  # No more pages
                         
             except urllib.error.URLError as e:
-                raise urllib.error.URLError(f"Failed to connect to Nexus API at {full_url}: {e}")
+                raise urllib.error.URLError( f"Failed to connect to Nexus API at {full_url}: {e}" )
             except json.JSONDecodeError as e:
-                raise ValueError(f"Failed to parse JSON response: {e}")
+                raise ValueError( f"Failed to parse JSON response: {e}" )
     
     return all_assets
 
 
-def get_all_components(nexus_url=None, repositories=None):
+def get_all_components( nexus_url=None, repositories=None ):
     """
     Retrieve a list of all components from specified repositories in a Nexus instance.
     
@@ -162,10 +162,10 @@ def get_all_components(nexus_url=None, repositories=None):
         nexus_url = get_nexus_url()
     
     # Get all repository names
-    all_repository_names = get_repository_names(nexus_url)
+    all_repository_names = get_repository_names( nexus_url )
     
     # Filter repositories if specified
-    if repositories and len(repositories) > 0:
+    if repositories and len( repositories ) > 0:
         # Only use repositories that exist in the Nexus instance
         repository_names = [repo for repo in repositories if repo in all_repository_names]
     else:
@@ -187,31 +187,31 @@ def get_all_components(nexus_url=None, repositories=None):
                 params["continuationToken"] = continuation_token
             
             # Build query string
-            query_string = "&".join([f"{k}={urllib.parse.quote(str(v))}" for k, v in params.items()])
+            query_string = "&".join( [f"{k}={urllib.parse.quote( str( v ) )}" for k, v in params.items( )] )
             full_url = f"{api_endpoint}?{query_string}"
             
             try:
-                with urllib.request.urlopen(full_url) as response:
-                    data = json.loads(response.read().decode('utf-8'))
+                with urllib.request.urlopen( full_url ) as response:
+                    data = json.loads( response.read( ).decode( 'utf-8' ) )
                     
                     # Extract components from the response
                     if 'items' in data:
-                        all_components.extend(data['items'])
+                        all_components.extend( data['items'] )
                     
                     # Check if there's a continuation token for pagination
-                    continuation_token = data.get('continuationToken')
+                    continuation_token = data.get( 'continuationToken' )
                     if not continuation_token:
                         break  # No more pages
                         
             except urllib.error.URLError as e:
-                raise urllib.error.URLError(f"Failed to connect to Nexus API at {full_url}: {e}")
+                raise urllib.error.URLError( f"Failed to connect to Nexus API at {full_url}: {e}" )
             except json.JSONDecodeError as e:
-                raise ValueError(f"Failed to parse JSON response: {e}")
+                raise ValueError( f"Failed to parse JSON response: {e}" )
     
     return all_components
 
 
-def generate_packages_list(repositories, components, output_file="packages_list.json"):
+def generate_packages_list( repositories, components, output_file="packages_list.json" ):
     """
     Generate a JSON output file listing repository names and components.
     
@@ -252,9 +252,9 @@ def generate_packages_list(repositories, components, output_file="packages_list.
                     filtered_asset['downloadUrl'] = asset['downloadUrl']
                 if 'path' in asset:
                     filtered_asset['path'] = asset['path']
-                filtered_assets.append(filtered_asset)
+                filtered_assets.append( filtered_asset )
             filtered_component['assets'] = filtered_assets
-        filtered_components.append(filtered_component)
+        filtered_components.append( filtered_component )
     
     # Structure the output data
     output_data = {
@@ -264,19 +264,18 @@ def generate_packages_list(repositories, components, output_file="packages_list.
     
     try:
         # Write JSON to file with pretty formatting
-        with open(output_file, 'w', encoding='utf-8') as f:
-            json.dump(output_data, f, indent=2, ensure_ascii=False)
+        with open( output_file, 'w', encoding='utf-8' ) as f:
+            json.dump( output_data, f, indent=2, ensure_ascii=False )
         
         return output_file
     except IOError as e:
-        raise IOError(f"Failed to write to output file {output_file}: {e}")
+        raise IOError( f"Failed to write to output file {output_file}: {e}" )
     except TypeError as e:
-        raise TypeError(f"Failed to serialize data to JSON: {e}")
+        raise TypeError( f"Failed to serialize data to JSON: {e}" )
 
 
 def main():
-    print("Hello, World!")
-    print("Nexus Populator service is running!")
+    print( "Nexus Populator service is running!" )
 
     repository_names = get_repository_names()
 
@@ -287,7 +286,7 @@ def main():
 
     #print( 'assets' )
     #print( '------------------------' )
-    #assets = get_all_assets()
+    #assets = get_all_assets( )
     #for asset in assets:
     #    print( f"asset: {asset}" )
 
@@ -302,3 +301,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
