@@ -279,8 +279,8 @@ def generate_packages_list_csv( components, output_file="packages_list.csv" ):
     Generate a CSV output file listing component fields.
     
     This function creates a CSV file containing component information.
-    The output excludes assets and includes all other component fields such as:
-    id, repository, format, group, name, version, etc.
+    The output excludes assets, id, group, and format fields.
+    Includes all other component fields such as: repository, name, version, etc.
     
     Args:
         components (list): List of component dictionaries to include in the output.
@@ -292,21 +292,28 @@ def generate_packages_list_csv( components, output_file="packages_list.csv" ):
     Raises:
         IOError: If the file cannot be written.
     """
+    # Fields to exclude from CSV output
+    excluded_fields = {'assets', 'id', 'group', 'format'}
+    
+    # Additional columns to always include (initialized as empty strings)
+    additional_columns = ['local_docker_build', 'jenkins_build']
+    
     if not components:
         # Create empty CSV with header if no components
         try:
             with open( output_file, 'w', newline='', encoding='utf-8' ) as f:
                 writer = csv.writer( f )
-                writer.writerow( ['id', 'repository', 'format', 'group', 'name', 'version'] )
+                header = ['repository', 'name', 'version'] + additional_columns
+                writer.writerow( header )
             return output_file
         except IOError as e:
             raise IOError( f"Failed to write to output file {output_file}: {e}" )
     
-    # Collect all possible field names from components (excluding 'assets')
+    # Collect all possible field names from components (excluding excluded fields)
     all_field_names = set( )
     for component in components:
         for key in component.keys( ):
-            if key != 'assets':
+            if key not in excluded_fields:
                 all_field_names.add( key )
     
     # Sort field names for consistent column order
@@ -321,16 +328,19 @@ def generate_packages_list_csv( components, output_file="packages_list.csv" ):
     # Add remaining fields in sorted order
     field_names.extend( sorted( all_field_names ) )
     
+    # Add additional columns at the end
+    field_names.extend( additional_columns )
+    
     try:
         with open( output_file, 'w', newline='', encoding='utf-8' ) as f:
             writer = csv.DictWriter( f, fieldnames=field_names, extrasaction='ignore' )
             writer.writeheader( )
             
             for component in components:
-                # Create a copy of component without assets
+                # Create a copy of component without excluded fields
                 row = {}
                 for k, v in component.items( ):
-                    if k != 'assets':
+                    if k not in excluded_fields:
                         # Convert complex types to strings for CSV
                         if v is None:
                             row[k] = ''
@@ -338,6 +348,11 @@ def generate_packages_list_csv( components, output_file="packages_list.csv" ):
                             row[k] = json.dumps( v )
                         else:
                             row[k] = v
+                
+                # Initialize additional columns as empty strings
+                for col in additional_columns:
+                    row[col] = ''
+                
                 writer.writerow( row )
         
         return output_file
